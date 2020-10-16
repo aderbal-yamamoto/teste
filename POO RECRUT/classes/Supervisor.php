@@ -29,7 +29,7 @@ class Supervisor extends Usuarios{
 		$this->dessenha = $dessenha;
 	}
 
-	public function exibir(){
+	/*public function exibir(){
 
 		return array(
 			"Nome: "=>$this->getNome(),
