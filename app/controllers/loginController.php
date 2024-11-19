@@ -54,5 +54,12 @@ class loginController extends Controller {
         // var_dump ($data);
         //$this->view('logins',$data);
     }
+    public function logout(){
+        session_start();
+        session_unset();
+        session_destroy();
+        echo 'Fim da seção';
+        header('Location: /teste/public/login');
+    }
 }
 
