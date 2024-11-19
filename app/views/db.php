@@ -7,8 +7,8 @@
 </head>
 <body>
     <?php foreach($data as $dados){
-       echo 'Nome: '.$dados['username'] . "<br>\n"; 
-       echo 'Senha: '.$dados['password']. "<br>\n";
+       echo 'Nome: '.$dados['nome'] . "<br>\n"; 
+       echo 'Senha: '.$dados['endereco']. "<br>\n";
         }?>
 </body>
 </html>

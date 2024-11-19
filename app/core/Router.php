@@ -50,7 +50,8 @@ class Router {
             'home' => 'HomeController',
             'sobre' => 'AboutController',
             'db' => 'DbController',
-            'new' => 'newController',
+            'login' => 'loginController',
+            'user' => 'UserController',
             // Adicione outros controladores aqui, se necessário
         ];
 

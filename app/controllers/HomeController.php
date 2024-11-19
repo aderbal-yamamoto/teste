@@ -6,8 +6,12 @@ use App\Models\User;
 
 class HomeController extends Controller {
     public function index() {
-        $user = new User("Aderbal");
-        $data = ['user' => $user->getName()];
-        $this->view('home', $data);
+      session_start();
+        if(empty($_SESSION)){
+            header('Location: login');
+        } else{ 
+            $this->view('home');
+            //echo 'Nome : '. $_SESSION['username'];
+        }
     }
 }

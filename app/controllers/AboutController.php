@@ -10,8 +10,5 @@ class AboutController extends Controller {
         $data = ['user' => $user->getName()];
         $this->view('sobre', $data);
     }
-    public function asd(){
-        
-        $this->view('create');
-    }
+    
 }

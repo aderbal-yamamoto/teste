@@ -5,9 +5,10 @@ use App\Core\Controller;
 use App\Models\Db;
 
 class DbController extends Controller {
+    
     public function index() {
         $user = new Db;
-        $data = $user->findAll();
+        $data = $user->findAll('pessoa');
         /*foreach($data as $user){
             //echo "<br>" . $user['nome'] ."<br>\n";
             $nome = $user['nome'];
@@ -17,6 +18,7 @@ class DbController extends Controller {
         */   
         $this->view('db', $data);   
     }
+    
     public function create(){
       
         if($_SERVER['REQUEST_METHOD']==='POST'){
@@ -24,9 +26,10 @@ class DbController extends Controller {
         $password = $_POST['password'];
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
         $data['username'] = $_POST['username'];
-        $data['hashedpassword'] = $hashedPassword;
+        $data['password'] = $hashedPassword;
         $user = new Db;
-        $user->create($data);
+        $result = $user->create('users',$data);
+        echo $result;
         }
     }
 }

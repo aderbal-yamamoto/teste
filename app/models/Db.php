@@ -3,8 +3,10 @@ namespace App\Models;
 
 use PDO;
 use PDOException;
-use PSpell\Config;
-
+/**
+ * Classe responsável pela interação com banco de dados
+ * de forma genérica para reutilização do código
+ */
 class Db {
     private static $conn;  // Conexão estática com o banco de dados
 
@@ -29,43 +31,138 @@ class Db {
         }
         return self::$conn;
     }
+ 
+/**
+ * 
+ * Função responsável por pesquisar dados do banco
+ * com ou sem parametros de condição ou ordenação 
+ * e limite
+ *
+ * @param string $table  
+ * @param array $condition opcional
+ * @param string $orderby opcional
+ * @param int $limit opcional  
+ * @return type array
+ * @throws conditon
+ **/
+public function findAll($table, $conditions = [], $orderBy = 'id', $limit = null) {
+    $conn = self::getConnection();
+    
+    // Inicia a parte da consulta SQL
+    $sql = "SELECT * FROM {$table}";
+    
+    // Adiciona condições à consulta, se fornecidas
+    if (!empty($conditions)) {
+        $sql .= " WHERE " . implode(' AND ', array_map(function($col) {
+            return "{$col} = :{$col}";
+        }, array_keys($conditions)));
+    }
+    
+    // Adiciona a cláusula ORDER BY
+    $sql .= " ORDER BY {$orderBy}"; 
+    
+    // Adiciona a cláusula LIMIT, se fornecido
+    if ($limit) {
+        $sql .= " LIMIT {$limit}";
+    }
 
-    // Função para buscar todos os registros da tabela "pessoa"
-    public function findAll() {
-        $conn = self::getConnection();  // Obtém a conexão
+    try {
+        // Prepara e executa a consulta
+        $stmt = $conn->prepare($sql);
+
+        // Faz o bind dos parâmetros, se houver
+        foreach ($conditions as $key => $value) {
+            $stmt->bindValue(":{$key}", $value);
+        }
+
+        $stmt->execute();
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $data;
+    } catch (PDOException $e) {
+        echo "Erro na consulta: " . $e->getMessage();
+        return [];
+    }
+}
+
+
+    // Função genérica para buscar um registro por id
+    public function findById($table, $id) {
+        $conn = self::getConnection();
         try {
-            $result = $conn->query("SELECT * FROM users ORDER BY id");  // Executa a consulta
-            $data = $result->fetchAll(PDO::FETCH_ASSOC);  // Retorna os resultados como um array associativo
-            /*
-            if (empty($data)) {
-                echo "Nenhum registro encontrado.";
-            } else {
-                echo "Registros encontrados: " . count($data);
-            }
-            */    
-            return $data;
+            $stmt = $conn->prepare("SELECT * FROM {$table} WHERE id = :id LIMIT 1");
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Em caso de erro na consulta, exibe a mensagem
             echo "Erro na consulta: " . $e->getMessage();
-            return [];
+            return null;
         }
     }
 
-    public function create($data){
-       
+    // Função genérica para inserir dados em uma tabela
+    public function create($table, $data) {
         $conn = self::getConnection();
-        $userName = $data['username'];
-        $hashedPassword = $data['hashedpassword'];
-        try{
-            $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (:username, :password)");
-            $stmt->bindParam(':username', $userName);
-            $stmt->bindParam(':password', $hashedPassword);
-            $stmt->execute();
-            echo 'Usuário cadastrado com sucesso!';
-        } catch(PDOException $e){
-            
-            echo "Erro ao cadastrar usuario!";
-        }
+        
+        // Criação da consulta dinâmica com os dados a serem inseridos
+        $columns = implode(", ", array_keys($data));
+        $placeholders = ":" . implode(", :", array_keys($data));
 
+        try {
+            $stmt = $conn->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})");
+            
+            // Bind de cada parâmetro dinamicamente
+            foreach ($data as $key => $value) {
+                $stmt->bindParam(":{$key}", $data[$key]);
+            }
+
+            $stmt->execute();
+            return "Registro inserido com sucesso!";
+        } catch (PDOException $e) {
+            echo "Erro ao inserir dados: " . $e->getMessage();
+            return "Erro ao inserir dados!";
+        }
+    }
+
+    // Função genérica para atualizar dados de uma tabela
+    public function update($table, $data, $id) {
+        $conn = self::getConnection();
+
+        // Criação da consulta dinâmica para os campos a serem atualizados
+        $setStatements = "";
+        foreach ($data as $key => $value) {
+            $setStatements .= "{$key} = :{$key}, ";
+        }
+        $setStatements = rtrim($setStatements, ", ");  // Remove a vírgula final
+
+        try {
+            $stmt = $conn->prepare("UPDATE {$table} SET {$setStatements} WHERE id = :id");
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+
+            // Bind de cada parâmetro dinamicamente
+            foreach ($data as $key => $value) {
+                $stmt->bindParam(":{$key}", $data[$key]);
+            }
+
+            $stmt->execute();
+            return "Registro atualizado com sucesso!";
+        } catch (PDOException $e) {
+            echo "Erro ao atualizar dados: " . $e->getMessage();
+            return "Erro ao atualizar dados!";
+        }
+    }
+
+    // Função genérica para excluir um registro de uma tabela
+    public function delete($table, $id) {
+        $conn = self::getConnection();
+        try {
+            $stmt = $conn->prepare("DELETE FROM {$table} WHERE id = :id");
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return "Registro excluído com sucesso!";
+        } catch (PDOException $e) {
+            echo "Erro ao excluir dados: " . $e->getMessage();
+            return "Erro ao excluir dados!";
+        }
     }
 }
