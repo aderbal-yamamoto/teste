@@ -27,18 +27,21 @@ class loginController extends Controller {
         
         if($_SERVER['REQUEST_METHOD']==='POST'){
            //receber dados nome de usuário e senha 
-            $username = $_POST['username'];
+            $username = trim($_POST['username']);
             $password = $_POST['password'];
            //Recuperrar dados do banco e colocar em $data
             $user = new Db;
             $data = $user->findAll('users', $conditions=['username'=>$username]);
-                     
-            foreach($data as $dados);
+            $dados = $data[0];
         
-            if(count($data)===0){
-                
-                header('Location:/teste/public/login');
-                
+            if (count($data) === 0){
+
+                echo "<script type='text/javascript'>
+                          alert('Usuário ou senha inválidos!');
+                            window.location.href = '/teste/public/login'; // Redireciona para a tela de login após o alerta
+                      </script>";
+                exit;
+
             }else{
 
                 if(password_verify($password, $dados['password'])){
@@ -46,8 +49,14 @@ class loginController extends Controller {
                     $_SESSION['username'] = $username;
                     
                     header('Location:/teste/public/sobre');
+                    exit;
+
                     }else   {
-                        echo'Não';
+                         echo "<script type='text/javascript'>
+                                alert('Usuário ou senha inválidos!');
+                                window.location.href = '/teste/public/login'; // Redireciona para a tela de login após o alerta
+                            </script>";
+                        exit;
                     }
                 }
             }
@@ -58,8 +67,12 @@ class loginController extends Controller {
         session_start();
         session_unset();
         session_destroy();
-        echo 'Fim da seção';
-        header('Location: /teste/public/login');
+        echo "<script type'text/javascript>
+                alert('Fim da seção!');
+                window.location.href = '/teste/public/login';
+              </script>";
+             exit;    
+            
     }
 }
 
