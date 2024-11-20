@@ -39,9 +39,10 @@ class Router {
             echo '404 - Método não encontrado';
             return;
         }
-
+        //echo $method;
         // Chama o método no controlador passando o parâmetro (se houver)
         $controllerInstance->$method($param);
+        
     }
 
     // Mapeia o nome do controlador para a classe correspondente
