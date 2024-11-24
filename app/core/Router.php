@@ -28,6 +28,7 @@ class Router {
             http_response_code(404);
             echo '404 - Controlador não encontrado';
             return;
+            
         }
 
         // Instancia o controlador
@@ -35,10 +36,13 @@ class Router {
         
         // Verifica se o método existe na classe
         if (!method_exists($controllerInstance, $method)) {
+            $controllerClass = "Error";
+            $method = 'index';
             http_response_code(404);
             echo '404 - Método não encontrado';
             return;
         }
+        
         //echo $method;
         // Chama o método no controlador passando o parâmetro (se houver)
         $controllerInstance->$method($param);

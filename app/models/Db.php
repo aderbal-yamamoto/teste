@@ -165,4 +165,16 @@ public function findAll($table, $conditions = [], $orderBy = 'id', $limit = null
             return "Erro ao excluir dados!";
         }
     }
+
+    public function maxId($table){
+        $conn = self::getConnection();
+        try {
+            $stmt = $conn->prepare("SELECT MAX(id) as max_id FROM $table;");
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            echo "Erro ao obter o max id" . $e->getMessage();
+            return 'Erro ao retornar o max id';
+        }
+    }
 }
